@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-blue: #007bff;
+  --color-white: #fff;
+  --color-yellow: #ffc107;
+  --color-orange: #fd7e14;
+  --font-poppins: Poppins, sans-serif;
+  --font-roboto: Roboto, sans-serif;
+}
+
+body {
+  color: #333;
+  background-color: #fff;
+  font-family: Roboto, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+}
