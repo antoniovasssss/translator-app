@@ -32,12 +32,10 @@ const FileUpload = ({ handleFileUpload }) => {
         return;
       }
 
-      // Call parent handler with the extracted content
+      // Call parent handler with the extracted content and original file
       handleFileUpload({
-        target: {
-          files: { 0: file }
-        },
-        content: content
+        file,
+        content,
       });
 
       setSuccess(true);

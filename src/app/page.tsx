@@ -10,6 +10,7 @@ import Notification from "@/components/Notification";
 
 const Home: React.FC = () => {
   const [sourceText, setSourceText] = useState<string>("");
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; size: number; type: string; url: string } | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
   const [sourceLanguage, setSourceLanguage] = useState<string>("English");
@@ -18,9 +19,10 @@ const Home: React.FC = () => {
 
   const targetText = useTranslate(sourceText, sourceLanguage, targetLanguage);
 
-  const handleFileUpload = async (e: any) => {
+  const handleFileUpload = async (payload: { file?: File; content?: string }) => {
     try {
-      const content = e.content || "";
+      const content = payload.content || "";
+      const file = payload.file;
 
       if (!content || content.trim().length === 0) {
         setNotification({
@@ -39,6 +41,15 @@ const Home: React.FC = () => {
       // Extract first 5000 characters
       const limitedText = text.substring(0, 5000);
       setSourceText(limitedText);
+
+      // Store metadata about the uploaded file (for showing a preview/download link)
+      if (file) {
+        if (uploadedFile?.url) {
+          URL.revokeObjectURL(uploadedFile.url);
+        }
+        const url = URL.createObjectURL(file);
+        setUploadedFile({ name: file.name, size: file.size, type: file.type, url });
+      }
 
       // Detect language
       try {
@@ -129,6 +140,31 @@ const Home: React.FC = () => {
               {/* Translation Display */}
               {sourceText && (
                 <div className="space-y-4">
+                  {/* Uploaded document info */}
+                  {uploadedFile && (
+                    <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 mb-4 text-sm text-slate-700">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="font-semibold text-slate-800">Uploaded document</p>
+                          <p className="text-xs text-slate-600">
+                            {uploadedFile.name} • {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <a
+                            href={uploadedFile.url}
+                            download={uploadedFile.name}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs"
+                          >
+                            Download original
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Toggle Buttons */}
                   <div className="flex flex-wrap gap-2 justify-center">
                     <button
@@ -196,7 +232,13 @@ const Home: React.FC = () => {
                   {/* Action Buttons */}
                   <div className="flex flex-wrap gap-2 justify-center">
                     <button
-                      onClick={() => setSourceText("")}
+                      onClick={() => {
+                        setSourceText("");
+                        if (uploadedFile?.url) {
+                          URL.revokeObjectURL(uploadedFile.url);
+                        }
+                        setUploadedFile(null);
+                      }}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-roboto text-sm sm:text-base"
                     >
                       Upload Another
