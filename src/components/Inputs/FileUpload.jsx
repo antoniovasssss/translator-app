@@ -53,9 +53,9 @@ const FileUpload = ({ handleFileUpload }) => {
 
   return (
     <div className="relative group">
-      <label 
-        htmlFor="file-upload" 
-        className="cursor-pointer text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1" 
+      <label
+        htmlFor="file-upload"
+        className="cursor-pointer text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"
         title="Upload any document (PDF, DOCX, Excel, TXT, RTF, etc.)"
       >
         <IconPaperclip size={21} />
@@ -67,7 +67,7 @@ const FileUpload = ({ handleFileUpload }) => {
           disabled={isLoading}
         />
       </label>
-      
+
       {/* Error tooltip */}
       {error && (
         <div className="absolute bottom-full left-0 mb-2 bg-red-600 text-white text-xs p-2 rounded whitespace-nowrap z-50 flex items-center gap-1 shadow-lg">
@@ -85,7 +85,9 @@ const FileUpload = ({ handleFileUpload }) => {
       )}
 
       {isLoading && (
-        <span className="text-xs text-blue-500 animate-pulse">Processing...</span>
+        <span className="text-xs text-blue-500 animate-pulse">
+          Processing...
+        </span>
       )}
     </div>
   );

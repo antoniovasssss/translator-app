@@ -1,8 +1,9 @@
 "use client";
 import "regenerator-runtime/runtime";
 import React, { useState } from "react";
-import { IconCopy, IconDownload } from "@tabler/icons-react";
+import { IconCopy } from "@tabler/icons-react";
 import FileUpload from "@/components/Inputs/FileUpload";
+import DownloadTranslation from "@/components/Buttons/DownloadTranslation";
 import useTranslate from "@/hooks/useTranslate";
 import { detectLanguage } from "@/utils/languageDetection";
 import SvgDecorations from "@/components/SvgDecorations";
@@ -10,16 +11,30 @@ import Notification from "@/components/Notification";
 
 const Home: React.FC = () => {
   const [sourceText, setSourceText] = useState<string>("");
-  const [uploadedFile, setUploadedFile] = useState<{ name: string; size: number; type: string; url: string } | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<{
+    file: File;
+    name: string;
+    size: number;
+    type: string;
+    url: string;
+  } | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
-  const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: string;
+  } | null>(null);
   const [sourceLanguage, setSourceLanguage] = useState<string>("English");
   const [targetLanguage, setTargetLanguage] = useState<string>("Spanish");
-  const [displayMode, setDisplayMode] = useState<"original" | "translation" | "both">("both");
+  const [displayMode, setDisplayMode] = useState<
+    "original" | "translation" | "both"
+  >("both");
 
   const targetText = useTranslate(sourceText, sourceLanguage, targetLanguage);
 
-  const handleFileUpload = async (payload: { file?: File; content?: string }) => {
+  const handleFileUpload = async (payload: {
+    file?: File;
+    content?: string;
+  }) => {
     try {
       const content = payload.content || "";
       const file = payload.file;
@@ -48,7 +63,13 @@ const Home: React.FC = () => {
           URL.revokeObjectURL(uploadedFile.url);
         }
         const url = URL.createObjectURL(file);
-        setUploadedFile({ name: file.name, size: file.size, type: file.type, url });
+        setUploadedFile({
+          file,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url,
+        });
       }
 
       // Detect language
@@ -81,20 +102,6 @@ const Home: React.FC = () => {
     navigator.clipboard.writeText(targetText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleDownloadTranslation = () => {
-    if (!targetText.trim()) {
-      alert("No translation to download");
-      return;
-    }
-    const element = document.createElement("a");
-    const file = new Blob([targetText], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = `translation_${sourceLanguage}_to_${targetLanguage}_${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
   };
 
   return (
@@ -145,9 +152,12 @@ const Home: React.FC = () => {
                     <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 mb-4 text-sm text-slate-700">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
-                          <p className="font-semibold text-slate-800">Uploaded document</p>
+                          <p className="font-semibold text-slate-800">
+                            Uploaded document
+                          </p>
                           <p className="text-xs text-slate-600">
-                            {uploadedFile.name} • {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                            {uploadedFile.name} •{" "}
+                            {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -199,7 +209,9 @@ const Home: React.FC = () => {
                     </button>
                   </div>
 
-                  <div className={`grid gap-4 ${displayMode === "both" ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
+                  <div
+                    className={`grid gap-4 ${displayMode === "both" ? "md:grid-cols-2" : "md:grid-cols-1"}`}
+                  >
                     {/* Source */}
                     {(displayMode === "original" || displayMode === "both") && (
                       <div className="border-2 border-blue-300 rounded-lg p-4 bg-white shadow-lg">
@@ -215,17 +227,22 @@ const Home: React.FC = () => {
                     )}
 
                     {/* Target */}
-                    {(displayMode === "translation" || displayMode === "both") && (
+                    {(displayMode === "translation" ||
+                      displayMode === "both") && (
                       <div className="border-2 border-orange-300 rounded-lg p-4 bg-white shadow-lg">
                         <div className="flex justify-between items-center mb-3">
                           <h3 className="font-poppins font-bold text-slate-900 text-sm sm:text-base">
                             Translation ({targetLanguage})
                           </h3>
                         </div>
-                      <div className="text-xs xs:text-sm sm:text-base text-slate-700 max-h-48 overflow-y-auto bg-orange-50 p-3 rounded font-roboto">
-                        {targetText || <span className="text-slate-400 italic">Translating...</span>}
+                        <div className="text-xs xs:text-sm sm:text-base text-slate-700 max-h-48 overflow-y-auto bg-orange-50 p-3 rounded font-roboto">
+                          {targetText || (
+                            <span className="text-slate-400 italic">
+                              Translating...
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
                     )}
                   </div>
 
@@ -249,15 +266,16 @@ const Home: React.FC = () => {
                     >
                       <IconCopy size={18} /> Copy
                     </button>
-                    <button
-                      onClick={handleDownloadTranslation}
-                      disabled={!targetText.trim()}
-                      className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-roboto text-sm sm:text-base disabled:opacity-50 flex items-center gap-2"
-                    >
-                      <IconDownload size={18} /> Download
-                    </button>
+                    <DownloadTranslation
+                      translatedText={targetText}
+                      originalFile={uploadedFile?.file}
+                    />
                   </div>
-                  {copied && <p className="text-center text-green-600 text-sm font-roboto">✓ Copied to clipboard!</p>}
+                  {copied && (
+                    <p className="text-center text-green-600 text-sm font-roboto">
+                      ✓ Copied to clipboard!
+                    </p>
+                  )}
                 </div>
               )}
 

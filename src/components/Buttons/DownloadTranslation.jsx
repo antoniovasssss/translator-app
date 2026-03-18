@@ -1,20 +1,31 @@
 import React from "react";
 import { IconDownload } from "@tabler/icons-react";
+import { createTranslatedFileBlob } from "@/utils/exportTranslation";
 
-const DownloadTranslation = ({ translatedText, sourceLanguage, targetLanguage }) => {
-  const handleDownload = () => {
+const DownloadTranslation = ({ translatedText, originalFile }) => {
+  const handleDownload = async () => {
     if (!translatedText.trim()) {
       alert("No translation to download");
       return;
     }
 
-    const element = document.createElement("a");
-    const file = new Blob([translatedText], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = `translation_${sourceLanguage}_to_${targetLanguage}_${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    try {
+      const { blob, filename } = await createTranslatedFileBlob({
+        originalFile,
+        translatedText,
+      });
+
+      const element = document.createElement("a");
+      element.href = URL.createObjectURL(blob);
+      element.download = filename;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      URL.revokeObjectURL(element.href);
+    } catch (error) {
+      console.error("Download error:", error);
+      alert("Unable to generate download file. Please try again.");
+    }
   };
 
   return (
@@ -25,7 +36,10 @@ const DownloadTranslation = ({ translatedText, sourceLanguage, targetLanguage })
       title="Download translated text"
       aria-label="Download translation"
     >
-      <IconDownload size={22} className="text-orange-600 hover:text-orange-700" />
+      <IconDownload
+        size={22}
+        className="text-orange-600 hover:text-orange-700"
+      />
     </button>
   );
 };
